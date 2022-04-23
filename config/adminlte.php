@@ -269,7 +269,7 @@ return [
         ],
         [
             'text'        => 'Citas Medicas',
-            'url'         => 'CitasMedicas',
+            'url'         => 'citas',
             'icon'        => 'fas fa-cubes',
         ],
         [

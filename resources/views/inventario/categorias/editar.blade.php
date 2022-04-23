@@ -28,7 +28,7 @@
                 </div>
                 <div class="card-footer">
                     <input class="btn btn-primary" type="submit" value="Actualizar" />
-                    <a class="btn btn-dark" href="{{url('categorias')}}">Regresar</a>
+                    <a class="btn btn-dark" href="{{ url('categorias') }}">Regresar</a>
                 </div>
             </div>
         @endforeach

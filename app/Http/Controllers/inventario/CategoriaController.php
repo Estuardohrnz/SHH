@@ -11,7 +11,8 @@ class CategoriaController extends Controller
 {
     private $cliente;
 
-    public function __construct () {
+    public function __construct()
+    {
         $this->cliente = new Client(['base_uri' => 'http://localhost:4000/TBL_CATEG_PRODUCTOS/']);
     }
 
@@ -24,7 +25,7 @@ class CategoriaController extends Controller
     {
         $respuesta = $this->cliente->get('');
         $cuerpo = $respuesta->getBody();
-        return view('inventario.categorias.inicio', ['categorias' => json_decode($cuerpo)]);
+        return view('inventario.categorias.inicio', ['categorias' => json_decode($cuerpo)]); //llama la ruta de la vista
     }
 
     /**
