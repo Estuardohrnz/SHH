@@ -4,9 +4,20 @@ namespace App\Http\Controllers\ReportesEstadisticas\Reportes;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade as PDF;
+use App\Models\citas;
+use GuzzleHttp\Client;
+use Dompdf\Options;
 
 class ReportesController extends Controller
 {
+    private $cliente;
+
+    public function __construct()
+    {
+        $this->cliente = new Client(['base_uri' => 'http://localhost:4000/TBL_CATEG_PRODUCTOS/']);
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -14,7 +25,9 @@ class ReportesController extends Controller
      */
     public function index()
     {
-        //
+        $respuesta = $this->cliente->get('');
+        $cuerpo = $respuesta->getBody();
+        return view('ReportesEstadisticas.Reportes.inicio', ['reportes' => json_decode($cuerpo)]); //llama la ruta de la vista
     }
 
     /**
@@ -24,7 +37,7 @@ class ReportesController extends Controller
      */
     public function create()
     {
-        //
+        return view('ReportesEstadisticas.Reportes.crear');
     }
 
     /**
@@ -35,7 +48,39 @@ class ReportesController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $this->cliente->post('', [
+            'json' => $request->all()
+        ]);
+
+        return redirect("/categorias");
+    }
+
+    //Devuelve el reporte de citas en pdf para verlo en el navegador
+    public function VerPdf_cita(){
+
+        //Primero se consulta el modelo para traer la data
+        /*SELECT * FROM `TBL_CITAS_MEDICAS` as c 
+        inner join TBL_PACIENTES as p where c.COD_PACIENTE=p.COD_PACIENTE */
+        $Citas=citas::join('TBL_PACIENTES', 'TBL_CITAS_MEDICAS.COD_PACIENTE', '=', 'TBL_PACIENTES.COD_PACIENTE')->get();
+/*$Nombre="";
+foreach($Citas as $data){
+$Nombre.=$data['PRIMER_NOMBRE'];
+
+}
+return $Citas;*/
+
+        //Especificar la data que va dnetro del pdf
+$Datos= compact('Citas');
+$Options= new Options;
+$Options->set(['isRemoteEnabled'=>'TRUE']);
+$Pdf1=new PDF($Options);
+$Pdf=$Pdf1::loadView('ReportesEstadisticas.Reportes.VerPdf_cita', $Datos)->setOptions(['defaultFont'=>'sans-serif']);
+
+//Para que muestre el pdf en el navegador
+        return ($Pdf->stream('ReporteCitas_'.date_default_timezone_get().'.pdf'));
+
+        //Para descargarlo a la pc
+       // return ($Pdf->download('ReporteCitas_'.date_default_timezone_get().'.pdf')); 
     }
 
     /**
@@ -46,7 +91,9 @@ class ReportesController extends Controller
      */
     public function show($id)
     {
-        //
+        $respuesta = $this->cliente->get($id);
+        $cuerpo = $respuesta->getBody();
+        return view('inventario.categorias.ver', ['categorias' => json_decode($cuerpo)]);
     }
 
     /**
@@ -57,7 +104,9 @@ class ReportesController extends Controller
      */
     public function edit($id)
     {
-        //
+        $respuesta = $this->cliente->get($id);
+        $cuerpo = $respuesta->getBody();
+        return view('inventario.categorias.editar', ['categorias' => json_decode($cuerpo)]);
     }
 
     /**
@@ -69,7 +118,11 @@ class ReportesController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $this->cliente->put($id, [
+            'json' => $request->all()
+        ]);
+
+        return redirect("/categorias");
     }
 
     /**
@@ -80,6 +133,8 @@ class ReportesController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $this->cliente->delete($id);
+
+        return redirect('/categorias');
     }
 }
